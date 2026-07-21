@@ -19,7 +19,7 @@ PACKAGE_NAME = "surface"
 ## Fedora tags: kernel-X.Y.Z
 ## Upstream tags: vX.Y.Z
 ##
-PACKAGE_TAG = "kernel-7.1.4"
+PACKAGE_TAG = "kernel-7.1.4-2"
 
 ##
 ## The release number of the modified kernel package.
