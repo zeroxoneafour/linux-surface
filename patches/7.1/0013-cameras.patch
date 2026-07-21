@@ -1019,99 +1019,15 @@ index 115bb37577a1..b2a54733df20 100644
 -- 
 2.54.0
 
-From 5ad8cdb53b18a72071bdff9821b774e1a3adedcf Mon Sep 17 00:00:00 2001
-From: gabrielstedman <gabrielstedman@users.noreply.github.com>
-Date: Fri, 13 Mar 2026 08:52:07 +0000
-Subject: [PATCH] media: ipu-bridge: Add front camera rotation quirks for
- Surface Pro 8 and 9
+From 1718e584d1060a2be75fee91cc6f4f1b8d3e78bd Mon Sep 17 00:00:00 2001
+From: Vaughan Milliman <vaughan@vaughanm.xyz>
+Date: Tue, 21 Jul 2026 15:57:04 -0500
+Subject: [PATCH] surface pro 9 camera patches
 
-On the Surface Pro 8 and 9, camera rotation in `ssdb.degree` is `0` (no
-rotation) but should be `180`. Add these devices to the respective quirk
-list.
-
-Also add quirk for back camera for SP9.
-
-Link: https://github.com/linux-surface/kernel/pull/160
-Patchset: cameras
 ---
- drivers/media/pci/intel/ipu-bridge.c | 14 ++++++++++++++
- 1 file changed, 14 insertions(+)
-
-diff --git a/drivers/media/pci/intel/ipu-bridge.c b/drivers/media/pci/intel/ipu-bridge.c
-index fc6608e33de4..8d42d7252747 100644
---- a/drivers/media/pci/intel/ipu-bridge.c
-+++ b/drivers/media/pci/intel/ipu-bridge.c
-@@ -134,6 +134,27 @@ static const struct dmi_system_id upside_down_sensor_dmi_ids[] = {
- 		},
- 		.driver_data = "OVTI02C1",
- 	},
-+	{
-+		.matches = {
-+			DMI_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
-+			DMI_MATCH(DMI_PRODUCT_NAME, "Surface Pro 8"),
-+		},
-+		.driver_data = "INT33BE",
-+	},
-+	{
-+		.matches = {
-+			DMI_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
-+			DMI_MATCH(DMI_PRODUCT_NAME, "Surface Pro 9"),
-+		},
-+		.driver_data = "OVTI5693",
-+	},
-+	{
-+	.matches = {
-+			DMI_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
-+			DMI_MATCH(DMI_PRODUCT_NAME, "Surface Pro 9"),
-+		},
-+		.driver_data = "OVTI13858",
-+	},
- 	{} /* Terminating entry */
- };
--- 
-2.54.0
-
-From b7ea7a2658e1c92afcfe0092f5d4e909fabeb5ef Mon Sep 17 00:00:00 2001
-From: Arsalan Naeem <naeemarsalan@gmail.com>
-Date: Thu, 11 Jun 2026 17:30:22 -0400
-Subject: [PATCH] media: i2c: ov5693: program MIPI_CTRL00 for IPU6 (Surface Pro
- 8/9 and Go 4 front cameras)
-
-The mainline ov5693 driver never writes MIPI_CTRL00 (register 0x4800),
-leaving it at its 0x00 power-on default. That default is accepted by the
-IPU3 ISP, where this sensor is used as the front camera on the Surface
-Pro 5/6/7, so the sensor works there. On the Surface Pro 8 the same
-sensor is wired to an IPU6 whose MIPI D-PHY does not lock onto the link
-with MIPI_CTRL00 == 0x00: the sensor reports streaming and the PHY powers
-up, but the receiver never gets any CSI-2 packets and capture times out
-("stream stop time out", zero packets, no SOT/CRC errors).
-
-Writing MIPI_CTRL00 = 0x2d before stream-on -- the value the vendor
-(Windows) driver programs for this module -- configures the CSI-2
-clock-lane behaviour the IPU6 expects, and the front camera then streams
-(verified at ~28 fps via libcamera on a Surface Pro 8, kernel 6.19).
-
-The same write has since been confirmed to fix the identical symptom on
-the other IPU6 Surface devices that use this sensor as the front camera:
-the Surface Go 4 (ov5693 at INT33BE, ~28.6 fps) and the Surface Pro 9
-(ov5693 at OVTI5693; that ACPI HID is already added by the "Add camera
-support for Surface Pro 9" patch earlier in this patchset, so no match
-table change is needed here).
-
-The value was reverse-engineered from the Surface Pro 8 Windows ov5693.sys
-register table; its exact bit meaning is taken from the vendor driver
-rather than a datasheet. It is written unconditionally, so it should be
-checked on the IPU3 Surface devices (Pro 5/6/7) before this is relied
-upon there.
-
-Link: https://github.com/linux-surface/linux-surface/issues/1893
-Link: https://github.com/linux-surface/linux-surface/issues/2154
-Link: https://github.com/linux-surface/linux-surface/issues/1892
-Patchset: cameras
-Signed-off-by: Arsalan Naeem <naeemarsalan@gmail.com>
----
- drivers/media/i2c/ov5693.c | 17 +++++++++++++++++
- 1 file changed, 17 insertions(+)
+ drivers/media/i2c/ov5693.c           | 17 +++++++++++++++++
+ drivers/media/pci/intel/ipu-bridge.c | 19 +++++++++++++++++++
+ 2 files changed, 36 insertions(+)
 
 diff --git a/drivers/media/i2c/ov5693.c b/drivers/media/i2c/ov5693.c
 index 4cc796bbee92..c0993d194118 100644
@@ -1148,5 +1064,36 @@ index 4cc796bbee92..c0993d194118 100644
  	cci_write(ov5693->regmap, OV5693_SW_STREAM_REG,
  		  enable ? OV5693_START_STREAMING : OV5693_STOP_STREAMING,
  		  &ret);
+diff --git a/drivers/media/pci/intel/ipu-bridge.c b/drivers/media/pci/intel/ipu-bridge.c
+index fc6608e33de4..0fec9d95b568 100644
+--- a/drivers/media/pci/intel/ipu-bridge.c
++++ b/drivers/media/pci/intel/ipu-bridge.c
+@@ -133,6 +133,25 @@ static const struct dmi_system_id upside_down_sensor_dmi_ids[] = {
+ 			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "XPS 16 9640"),
+ 		},
+ 		.driver_data = "OVTI02C1",
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "Surface Pro 8"),
++		},
++		.driver_data = "INT33BE",
++	},
++	{
++		.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "Surface Pro 9"),
++		},
++		.driver_data = "OVTI5693",
++	},
++	{
++	.matches = {
++			DMI_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
++			DMI_MATCH(DMI_PRODUCT_NAME, "Surface Pro 9"),
++		},
++		.driver_data = "OVTI13858",
+ 	},
+ 	{} /* Terminating entry */
+ };
 -- 
-2.54.0
+2.55.0
+
