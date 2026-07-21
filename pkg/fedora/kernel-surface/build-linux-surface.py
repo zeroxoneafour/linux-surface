@@ -11,7 +11,7 @@ import logging
 ##
 ## The name of the modified kernel package.
 ##
-PACKAGE_NAME = "surface"
+PACKAGE_NAME = "fedsurface"
 
 ##
 ## https://gitlab.com/cki-project/kernel-ark/-/tags
@@ -19,13 +19,13 @@ PACKAGE_NAME = "surface"
 ## Fedora tags: kernel-X.Y.Z
 ## Upstream tags: vX.Y.Z
 ##
-PACKAGE_TAG = "kernel-7.1.4-2"
+PACKAGE_TAG = "kernel-7.1.4-1"
 
 ##
 ## The release number of the modified kernel package.
 ## e.g. 300 for kernel-6.3.1-300.fc38.foo
 ##
-PACKAGE_RELEASE = "2"
+PACKAGE_RELEASE = "1"
 
 ##
 ## Build options for configuring which parts of the kernel package are enabled.
