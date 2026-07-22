@@ -1019,15 +1019,16 @@ index 115bb37577a1..b2a54733df20 100644
 -- 
 2.54.0
 
-From 1718e584d1060a2be75fee91cc6f4f1b8d3e78bd Mon Sep 17 00:00:00 2001
+From 860b41e2245aabb649d27aebd72999c4f25d9d49 Mon Sep 17 00:00:00 2001
 From: Vaughan Milliman <vaughan@vaughanm.xyz>
 Date: Tue, 21 Jul 2026 15:57:04 -0500
 Subject: [PATCH] surface pro 9 camera patches
 
+fixed up rear camera
 ---
  drivers/media/i2c/ov5693.c           | 17 +++++++++++++++++
- drivers/media/pci/intel/ipu-bridge.c | 19 +++++++++++++++++++
- 2 files changed, 36 insertions(+)
+ drivers/media/pci/intel/ipu-bridge.c | 21 +++++++++++++++++++++
+ 2 files changed, 38 insertions(+)
 
 diff --git a/drivers/media/i2c/ov5693.c b/drivers/media/i2c/ov5693.c
 index 4cc796bbee92..c0993d194118 100644
@@ -1065,13 +1066,14 @@ index 4cc796bbee92..c0993d194118 100644
  		  enable ? OV5693_START_STREAMING : OV5693_STOP_STREAMING,
  		  &ret);
 diff --git a/drivers/media/pci/intel/ipu-bridge.c b/drivers/media/pci/intel/ipu-bridge.c
-index fc6608e33de4..0fec9d95b568 100644
+index 8cfa3282bf08..4496fb16def9 100644
 --- a/drivers/media/pci/intel/ipu-bridge.c
 +++ b/drivers/media/pci/intel/ipu-bridge.c
-@@ -133,6 +133,25 @@ static const struct dmi_system_id upside_down_sensor_dmi_ids[] = {
- 			DMI_EXACT_MATCH(DMI_PRODUCT_NAME, "XPS 16 9640"),
+@@ -136,6 +136,27 @@ static const struct dmi_system_id upside_down_sensor_dmi_ids[] = {
  		},
  		.driver_data = "OVTI02C1",
+ 	},
++	{
 +		.matches = {
 +			DMI_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
 +			DMI_MATCH(DMI_PRODUCT_NAME, "Surface Pro 8"),
@@ -1086,14 +1088,15 @@ index fc6608e33de4..0fec9d95b568 100644
 +		.driver_data = "OVTI5693",
 +	},
 +	{
-+	.matches = {
++		.matches = {
 +			DMI_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
 +			DMI_MATCH(DMI_PRODUCT_NAME, "Surface Pro 9"),
 +		},
-+		.driver_data = "OVTI13858",
- 	},
- 	{} /* Terminating entry */
- };
++		.driver_data = "OVTID858",
++	},
+ 	/*
+ 	 * The first four characters of DMI_BOARD_NAME identify the Lenovo
+ 	 * machine type/model. For example, a DMI_BOARD_NAME starting with
 -- 
 2.55.0
 
