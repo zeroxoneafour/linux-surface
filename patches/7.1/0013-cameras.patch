@@ -1019,7 +1019,7 @@ index 115bb37577a1..b2a54733df20 100644
 -- 
 2.54.0
 
-From f610015c09e3e0402a0e438fad3ede264f6a536c Mon Sep 17 00:00:00 2001
+From f512f62021b97e29f44e90260468ec3d0663ef91 Mon Sep 17 00:00:00 2001
 From: Vaughan Milliman <vaughan@vaughanm.xyz>
 Date: Tue, 21 Jul 2026 15:57:04 -0500
 Subject: [PATCH] surface pro 9 camera patches
@@ -1031,6 +1031,8 @@ support multiple cameras on same board
 fix misunderstanding of strsep
 
 only rotate back camera i guess
+
+revert camera rotation change
 ---
  drivers/media/i2c/ov5693.c           | 17 ++++++++++++++
  drivers/media/pci/intel/ipu-bridge.c | 34 ++++++++++++++++++++++++++--
@@ -1072,7 +1074,7 @@ index 4cc796bbee92..c0993d194118 100644
  		  enable ? OV5693_START_STREAMING : OV5693_STOP_STREAMING,
  		  &ret);
 diff --git a/drivers/media/pci/intel/ipu-bridge.c b/drivers/media/pci/intel/ipu-bridge.c
-index 8cfa3282bf08..a5d231d96771 100644
+index 8cfa3282bf08..245a7fd75998 100644
 --- a/drivers/media/pci/intel/ipu-bridge.c
 +++ b/drivers/media/pci/intel/ipu-bridge.c
 @@ -11,6 +11,7 @@
@@ -1099,7 +1101,7 @@ index 8cfa3282bf08..a5d231d96771 100644
 +			DMI_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
 +			DMI_MATCH(DMI_PRODUCT_NAME, "Surface Pro 9"),
 +		},
-+		.driver_data = "OVTID858",
++		.driver_data = "OVTI5693 OVTID858",
 +	},
  	/*
  	 * The first four characters of DMI_BOARD_NAME identify the Lenovo
