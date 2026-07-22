@@ -1019,7 +1019,7 @@ index 115bb37577a1..b2a54733df20 100644
 -- 
 2.54.0
 
-From 85dabf565c853cd1b4ed1b75c42b349bc3e2987c Mon Sep 17 00:00:00 2001
+From f610015c09e3e0402a0e438fad3ede264f6a536c Mon Sep 17 00:00:00 2001
 From: Vaughan Milliman <vaughan@vaughanm.xyz>
 Date: Tue, 21 Jul 2026 15:57:04 -0500
 Subject: [PATCH] surface pro 9 camera patches
@@ -1029,10 +1029,12 @@ fixed up rear camera
 support multiple cameras on same board
 
 fix misunderstanding of strsep
+
+only rotate back camera i guess
 ---
- drivers/media/i2c/ov5693.c           | 17 +++++++++++++++
- drivers/media/pci/intel/ipu-bridge.c | 31 ++++++++++++++++++++++++++--
- 2 files changed, 46 insertions(+), 2 deletions(-)
+ drivers/media/i2c/ov5693.c           | 17 ++++++++++++++
+ drivers/media/pci/intel/ipu-bridge.c | 34 ++++++++++++++++++++++++++--
+ 2 files changed, 49 insertions(+), 2 deletions(-)
 
 diff --git a/drivers/media/i2c/ov5693.c b/drivers/media/i2c/ov5693.c
 index 4cc796bbee92..c0993d194118 100644
@@ -1070,7 +1072,7 @@ index 4cc796bbee92..c0993d194118 100644
  		  enable ? OV5693_START_STREAMING : OV5693_STOP_STREAMING,
  		  &ret);
 diff --git a/drivers/media/pci/intel/ipu-bridge.c b/drivers/media/pci/intel/ipu-bridge.c
-index 8cfa3282bf08..0e60601046f8 100644
+index 8cfa3282bf08..a5d231d96771 100644
 --- a/drivers/media/pci/intel/ipu-bridge.c
 +++ b/drivers/media/pci/intel/ipu-bridge.c
 @@ -11,6 +11,7 @@
@@ -1097,23 +1099,26 @@ index 8cfa3282bf08..0e60601046f8 100644
 +			DMI_MATCH(DMI_SYS_VENDOR, "Microsoft Corporation"),
 +			DMI_MATCH(DMI_PRODUCT_NAME, "Surface Pro 9"),
 +		},
-+		.driver_data = "OVTI5693 OVTID858",
++		.driver_data = "OVTID858",
 +	},
  	/*
  	 * The first four characters of DMI_BOARD_NAME identify the Lenovo
  	 * machine type/model. For example, a DMI_BOARD_NAME starting with
-@@ -331,8 +346,20 @@ static u32 ipu_bridge_parse_rotation(struct acpi_device *adev,
+@@ -331,8 +346,23 @@ static u32 ipu_bridge_parse_rotation(struct acpi_device *adev,
  	const struct dmi_system_id *dmi_id;
  
  	dmi_id = dmi_first_match(upside_down_sensor_dmi_ids);
 -	if (dmi_id && acpi_dev_hid_match(adev, dmi_id->driver_data))
 -		return 180;
-+	/* Handle (potentially) multiple cameras that match the same board */
++	/*
++	 * Handle (potentially) multiple cameras that match the same board
++	 * Separate different cameras with spaces (ex. "OVTI5693 OVTID858")
++	*/
 +	if (dmi_id) {
-+		const char* driver_data = kmalloc(strlen(dmi_id->driver_data)+1, GFP_KERNEL);
++		char const * driver_data = kmalloc(strlen(dmi_id->driver_data)+1, GFP_KERNEL);
 +		strcpy(driver_data, dmi_id->driver_data);
-+		char* driver_data_mut = driver_data;
-+		char* token;
++		char *driver_data_mut = driver_data;
++		char *token;
 +		while ((token = strsep(&driver_data_mut, " ")) != NULL) {
 +			if (acpi_dev_hid_match(adev, token)) {
 +				kfree(driver_data);
