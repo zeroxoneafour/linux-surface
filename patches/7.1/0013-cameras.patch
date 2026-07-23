@@ -1019,7 +1019,7 @@ index 115bb37577a1..b2a54733df20 100644
 -- 
 2.54.0
 
-From f512f62021b97e29f44e90260468ec3d0663ef91 Mon Sep 17 00:00:00 2001
+From 39bde8553505e74c861a3ba55bae3171ed75cf66 Mon Sep 17 00:00:00 2001
 From: Vaughan Milliman <vaughan@vaughanm.xyz>
 Date: Tue, 21 Jul 2026 15:57:04 -0500
 Subject: [PATCH] surface pro 9 camera patches
@@ -1033,6 +1033,8 @@ fix misunderstanding of strsep
 only rotate back camera i guess
 
 revert camera rotation change
+
+const on my meat heh
 ---
  drivers/media/i2c/ov5693.c           | 17 ++++++++++++++
  drivers/media/pci/intel/ipu-bridge.c | 34 ++++++++++++++++++++++++++--
@@ -1074,7 +1076,7 @@ index 4cc796bbee92..c0993d194118 100644
  		  enable ? OV5693_START_STREAMING : OV5693_STOP_STREAMING,
  		  &ret);
 diff --git a/drivers/media/pci/intel/ipu-bridge.c b/drivers/media/pci/intel/ipu-bridge.c
-index 8cfa3282bf08..245a7fd75998 100644
+index 8cfa3282bf08..afdb57b17928 100644
 --- a/drivers/media/pci/intel/ipu-bridge.c
 +++ b/drivers/media/pci/intel/ipu-bridge.c
 @@ -11,6 +11,7 @@
@@ -1117,7 +1119,7 @@ index 8cfa3282bf08..245a7fd75998 100644
 +	 * Separate different cameras with spaces (ex. "OVTI5693 OVTID858")
 +	*/
 +	if (dmi_id) {
-+		char const * driver_data = kmalloc(strlen(dmi_id->driver_data)+1, GFP_KERNEL);
++		char * const driver_data = kmalloc(strlen(dmi_id->driver_data)+1, GFP_KERNEL);
 +		strcpy(driver_data, dmi_id->driver_data);
 +		char *driver_data_mut = driver_data;
 +		char *token;
